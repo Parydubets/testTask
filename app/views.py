@@ -1,11 +1,9 @@
-from django.contrib.auth.models import Group, User
+from django.contrib.auth.models import User
 from rest_framework import permissions, viewsets
 
-from testTask.quickstart.serializers import GroupSerializer, UserSerializer
+from app.serializers import UserSerializer
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from rest_framework.permissions import IsAuthenticated
-from rest_framework_simplejwt.authentication import JWTAuthentication
 
 
 class Home(APIView):
