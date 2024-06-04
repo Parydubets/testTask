@@ -1,4 +1,4 @@
-
+from os import environ
 from pathlib import Path
 from datetime import timedelta # import this library top of the settings.py file
 
@@ -21,12 +21,9 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
-    'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
-    'django.contrib.messages',
-    'django.contrib.staticfiles',
     'rest_framework',
     'rest_framework_simplejwt',
 ]
@@ -67,12 +64,12 @@ WSGI_APPLICATION = 'testTask.wsgi.application'
 
 DATABASES = {
     "default": {
-        "ENGINE": "django.db.backends.postgresql",
-        "NAME": "restaurant_service",
-        "USER": "postgres",
-        "PASSWORD": "admin",
-        "HOST": "127.0.0.1",
-        "PORT": "5432",
+        "ENGINE": environ.get("DB_DRIVER","django.db.backends.postgresql"),
+        "NAME": environ.get("DB_NAME","restaurant_service"),
+        "USER": environ.get("DB_USER","postgres"),
+        "PASSWORD": environ.get("DB_PASSWORD","admin"),
+        "HOST": environ.get("DB_HOST","127.0.0.1"),
+        "PORT": environ.get("DB_PORT","5432"),
     }
 }
 
