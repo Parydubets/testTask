@@ -1,4 +1,4 @@
-from os import environ
+import os
 from pathlib import Path
 from datetime import timedelta # import this library top of the settings.py file
 
@@ -41,7 +41,7 @@ MIDDLEWARE = [
 ]
 
 ROOT_URLCONF = 'testTask.urls'
-
+APPEND_SLASH=False
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
@@ -66,12 +66,12 @@ WSGI_APPLICATION = 'testTask.wsgi.application'
 
 DATABASES = {
     "default": {
-        "ENGINE": environ.get("DB_DRIVER","django.db.backends.postgresql"),
-        "NAME": environ.get("DB_NAME","restaurant_service"),
-        "USER": environ.get("DB_USER","postgres"),
-        "PASSWORD": environ.get("DB_PASSWORD","admin"),
-        "HOST": environ.get("DB_HOST","127.0.0.1"),
-        "PORT": environ.get("DB_PORT","5432"),
+        "ENGINE": os.environ.get("DB_DRIVER","django.db.backends.postgresql"),
+        "NAME": os.environ.get("DB_NAME","restaurant_service"),
+        "USER": os.environ.get("DB_USER","postgres"),
+        "PASSWORD": os.environ.get("DB_PASSWORD","admin"),
+        "HOST": os.environ.get("DB_HOST","127.0.0.1"),
+        "PORT": os.environ.get("DB_PORT","5432"),
     }
 }
 
@@ -111,6 +111,9 @@ USE_TZ = True
 
 STATIC_URL = 'static/'
 
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+MEDIA_URL = '/media/'
+
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.0/ref/settings/#default-auto-field
 
@@ -122,6 +125,12 @@ REST_FRAMEWORK = {
         'rest_framework.renderers.JSONRenderer',
         'rest_framework.renderers.BrowsableAPIRenderer',
     ],
+    'DEFAULT_PERMISSION_CLASSES': (
+        'rest_framework.permissions.AllowAny',
+    ),
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+    ),
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
     'PAGE_SIZE': 10,
 }

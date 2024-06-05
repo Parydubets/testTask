@@ -6,3 +6,4 @@ psycopg2_binary==2.9.9
 pytest-django==4.8.0
 sqlparse==0.5.0
 tzdata==2024.1
+Pillow
