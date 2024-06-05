@@ -4,6 +4,9 @@ from django.core.files import File
 import urllib
 import os
 
+class User(User):
+    pass
+
 DAYS = (("sunday", "sunday"), ("monday", "monday"), ("tuesday", "tuesday"), ("wednesday", "wednesday"),
         ("thursday", "thursday"), ("friday", "friday"), ("saturday", "saturday"))
 
