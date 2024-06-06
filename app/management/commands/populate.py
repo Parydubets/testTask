@@ -100,7 +100,6 @@ class Command(BaseCommand):
         DAYS = (("sunday", "sunday"), ("monday", "monday"), ("tuesday", "tuesday"), ("wednesday", "wednesday"),
                 ("thursday", "thursday"), ("friday", "friday"), ("saturday", "saturday"))
 
-        media_path = 'media/menu.jpg'  # Path to the menu image file in the media folder
         for restaurant_id, restaurant_instance in restaurants.items():
             for day in DAYS:
 
