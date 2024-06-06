@@ -1,22 +1,22 @@
 from django.contrib.auth.models import User
-from .models import Restaurant, Category, Menu, Votes
+from .models import Restaurant, Menu, Votes
 from rest_framework import permissions, viewsets, request, status
-from rest_framework_simplejwt import authentication
 from app.serializers import UserSerializer, RestaurantSerializer, MenuSerializer,\
     UserRegistrationSerializer, VotesSerializer
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from rest_framework.permissions import IsAdminUser
-from rest_framework.decorators import permission_classes
-# >>> from django.contrib.auth.models import User
-# >>> user = User.objects.create_user("john", "lennon@thebeatles.com", "johnpassword")
+from django.utils import timezone
+from django.db.models import Count
+
+
 
 class Home(APIView):
+    # Test view
     def get(self, request):
         content = {'message': 'Hello, World!'}
-
         return Response(content)
 
+#TODO: add docstrings with required parameters to methods
 
 class UserCreateAPI(APIView):
     def post(self, request):
@@ -47,12 +47,15 @@ class UserUpdateAPI(APIView):
             return Response(serializer.data)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+
 class RestaurantAPI(APIView):
+    #Returns restaurants list, creates restaurant, updates restaurant
     permission_classes = [permissions.IsAuthenticated]
     def get(self, request):
         query = Restaurant.objects.all()
         serializer = RestaurantSerializer(query, many=True, context={'request': request})
         return Response(serializer.data)
+
 
     def post(self, request):
         data=request.data
@@ -62,6 +65,7 @@ class RestaurantAPI(APIView):
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
 
     def put(self, request, id):
 
@@ -82,14 +86,19 @@ class RestaurantAPI(APIView):
 
 
 class MenuAPIPublic(APIView):
+    #Returns available menus for current week day
     authentication_classes = []
+
     def get(self, request):
-        query = Menu.objects.all()
-        serializer = MenuSerializer(query, many=True, context={'request': request})
-        return Response(serializer.data)
+        today = timezone.now().strftime('%A').lower()
+        menus_today = Menu.objects.filter(week_day=today)
+        serializer = MenuSerializer(menus_today, many=True, context={'request': request})
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
 
 class MenuAPI(APIView):
+    #Creates, updates menu
+
     permission_classes = [permissions.IsAuthenticated]
     def post(self, request):
         restaurant_id = request.data.get('restaurant')
@@ -116,6 +125,7 @@ class MenuAPI(APIView):
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+
     def put(self, request, id):
         try:
             menu = Menu.objects.filter(restaurant_id=id).get(week_day=request.data["week_day"])
@@ -136,18 +146,59 @@ class MenuAPI(APIView):
             return Response(serializer.data)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+
 class VotesAPI(APIView):
-    permission_classes([permissions.IsAuthenticated])
+    #Makes a vote for current user
+    permission_classes = [permissions.IsAuthenticated]
+
     def get(self, request):
         queryset = Votes.objects.all().order_by('-id')
-        serializer = VotesSerializer()
+        serializer = VotesSerializer(queryset, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    def post(self, request):
+        today = timezone.now().date()
+        data = request.data.copy()
+        data['vote_user_id'] = request.user.id
+        current_day = timezone.now().strftime('%A').lower()
+        data["datetime"] = timezone.now()
+
+        try:
+            menu = Menu.objects.filter(week_day=current_day).filter(update_time__date=today).exists()
+            return Response(menu)
+        except Menu.DoesNotExist:
+            return Response({'error': 'No menu found for today'}, status=status.HTTP_404_NOT_FOUND)
+
+        if Votes.objects.filter(vote_user_id=request.user.id, datetime__date=timezone.now().date()).exists():
+            return Response({'error': 'You have already voted today'}, status=status.HTTP_400_BAD_REQUEST)
+
+        #TODO: allow to vote only for updated today menu
+
+        serializer = VotesSerializer(data=data)
         if serializer.is_valid():
-            return Response(serializer.data, status=status.HTTP_200_OK)
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+class TopVoteAPI(APIView):
+    #Returns 2 best restaurants by votes for today
+    def get(self, request):
+        today = timezone.now().date()
+        current_day = timezone.now().strftime('%A').lower()
+        try:
+            menu = Menu.objects.filter(week_day=current_day).exists()
+        except Menu.DoesNotExist:
+            return Response({'error': 'No menu found for today'}, status=status.HTTP_404_NOT_FOUND)
+        top_restaurants = (Votes.objects.filter(datetime__date=today)
+                           .values('restaurant_id')
+                           .annotate(vote_count=Count('id'))
+                           .order_by('-vote_count')[:2])
 
-def post(self):
-        pass
+        restaurant_ids = [restaurant['restaurant_id'] for restaurant in top_restaurants]
+        restaurants = Restaurant.objects.filter(id__in=restaurant_ids)
+
+        serializer = RestaurantSerializer(restaurants, many=True, context={'request': request})
+        return Response(serializer.data)
 
 class UserViewSet(viewsets.ModelViewSet):
 

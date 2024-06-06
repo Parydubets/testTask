@@ -7,6 +7,7 @@ echo "Starting Migrations..."
 python manage.py migrate
 echo ====================================
 
+python manage.py populate
 
 pytest testTask
 

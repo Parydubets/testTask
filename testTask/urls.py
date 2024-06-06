@@ -7,7 +7,6 @@ from django.urls import path, include
 
 
 router = routers.DefaultRouter()
-router.register(r'users', views.UserViewSet)
 
 # Wire up our API using automatic URL routing.
 # Additionally, we include login URLs for the browsable API.
@@ -22,6 +21,7 @@ urlpatterns = [
     path('api/menus', views.MenuAPIPublic.as_view(), name="menu-create"),
     path('api/menus/<int:id>', views.MenuAPI.as_view(), name="menu-update"),
     path('api/votes', views.VotesAPI.as_view(), name="votes-show"),
+    path('api/top_votes', views.TopVoteAPI.as_view(), name="top-rated"),
     path('api/token', TokenObtainPairView.as_view(), name='token_obtain_pair'),
     path('api/token/refresh', TokenRefreshView.as_view(), name='token_refresh'),
 ]

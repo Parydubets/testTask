@@ -1,11 +1,10 @@
 from django.db import models
 from django.contrib.auth.models import User
 from django.core.files import File
+from django.utils import timezone
 import urllib
 import os
 
-class User(User):
-    pass
 
 DAYS = (("sunday", "sunday"), ("monday", "monday"), ("tuesday", "tuesday"), ("wednesday", "wednesday"),
         ("thursday", "thursday"), ("friday", "friday"), ("saturday", "saturday"))
@@ -20,10 +19,6 @@ class Restaurant(models.Model):
 
 
 
-class Category(models.Model):
-    name = models.CharField(20)
-
-
 def user_directory_path(instance, filename):
     return "restaurant_{0}/{1}".format(instance.restaurant_id, filename)
 
@@ -33,6 +28,12 @@ class Menu(models.Model):
     upload = models.ImageField(upload_to=user_directory_path, blank=True, null=True, default=None)
     week_day = models.CharField(choices=DAYS, default="monday")
     update_time = models.DateTimeField()
+
+
+    def save(self, *args, **kwargs):
+        self.update_time = timezone.now()  # Set update_time to current time
+        super().save(*args, **kwargs)
+
 
     def cache(self):
         """Store image locally if we have a URL"""

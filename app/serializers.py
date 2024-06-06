@@ -1,5 +1,5 @@
 from django.contrib.auth.models import User
-from .models import Restaurant, Category, Menu, Votes, DAYS
+from .models import Restaurant, Menu, Votes, DAYS
 from rest_framework import serializers
 
 
