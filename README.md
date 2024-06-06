@@ -23,13 +23,14 @@ This app uses additional software you should have:
 To run application on itself localy  you should clone it from repo with 
 
 ```sh
-git clone github.com/Parydubets/testTask
+git clone https://github.com/Parydubets/testTask
 cd .\testTask\
 ```
 Create a virtual environment
 ```sh
 python -m venv env
 env/Scripts/activate  #(for windows)
+pip install -r .\requirements.txt
 ```
 For app usage you need to have PostgresSQL database running. By default the database is "restaurant_service". You can change it in configuration (ssettings.py) or set environment variables
 
