@@ -89,7 +89,7 @@ def populate_db(django_db_setup, django_db_blocker):
             }
         ]
 
-        media_path = 'media/menu.jpg'
+        media_path = 'testTask/media/menu.jpg'
         restaurants = {}
         for restaurant_data in restaurants_data:
             user_instance = restaurant_data.pop('user')
@@ -99,7 +99,6 @@ def populate_db(django_db_setup, django_db_blocker):
         DAYS = (("sunday", "sunday"), ("monday", "monday"), ("tuesday", "tuesday"), ("wednesday", "wednesday"),
                 ("thursday", "thursday"), ("friday", "friday"), ("saturday", "saturday"))
 
-        media_path = 'media/menu.jpg'  # Path to the menu image file in the media folder
         for restaurant_id, restaurant_instance in restaurants.items():
             for day in DAYS:
 
