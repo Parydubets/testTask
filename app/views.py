@@ -28,7 +28,6 @@ class UserCreateAPI(APIView):
 
 
 class UserUpdateAPI(APIView):
-    permission_classes = [permissions.IsAuthenticated]
 
     def put(self, request, id):
         try:
@@ -37,14 +36,14 @@ class UserUpdateAPI(APIView):
             return Response({'error': 'User not found'}, status=status.HTTP_404_NOT_FOUND)
 
         # Check if the requesting user is the user to be updated or an admin
-        if request.user != user and not user.is_staff:
+        if request.user != user and not user.is_superuser:
             return Response({'error': 'Permission denied'}, status=status.HTTP_403_FORBIDDEN)
 
 
-        serializer = UserSerializer(user, data=request.data, partial=True)
+        serializer = UserRegistrationSerializer(user, data=request.data, partial=True, context={'request': request})
         if serializer.is_valid():
             serializer.save()
-            return Response(serializer.data)
+            return Response(serializer.data, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
@@ -69,7 +68,7 @@ class RestaurantAPI(APIView):
 
     def put(self, request, id):
 
-        if not request.user.is_staff:
+        if not request.user.is_superuser:
             return Response({'error': 'Admin access required'}, status=status.HTTP_403_FORBIDDEN)
         data = request.data
         data["user"] = request.user.id
