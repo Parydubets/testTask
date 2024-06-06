@@ -1,14 +1,11 @@
 # conftest.py
-import subprocess
 import pytest
 import os
 from django.contrib.auth.models import User
 from django.contrib.auth.hashers import make_password
 from django.utils import timezone
-from app.models import Restaurant, Menu
 from django.core.files import File
 from app.models import Restaurant, Menu, Votes
-from datetime import datetime
 
 
 @pytest.fixture(scope='session', autouse=True)

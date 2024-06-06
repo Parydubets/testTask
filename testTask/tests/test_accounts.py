@@ -2,8 +2,6 @@ from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APITestCase
 from app.models import User
-from rest_framework.views import APIView
-from rest_framework import permissions
 
 def test_with_client(client):
     response = client.get('/home')
@@ -66,11 +64,6 @@ class AccountTestsAdmin(APITestCase):
             "last_name": "updatedlast",
             "email": "updatedtest@gmail.com",
         }
-        credentials = {
-            'username': 'choko_admin',
-            'password': 'choko_admin1'
-        }
-        self.client.credentials(HTTP_AUTHORIZATION=f'Bearer {self.get_token(credentials)}')
         response = self.client.put(self.url_update, data, format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
@@ -80,18 +73,16 @@ class AccountTestsAdmin(APITestCase):
         self.assertEqual(updated_user.email, 'updatedtest@gmail.com')
 
     def test_update_user_without_permission(self):
-        other_user = User.objects.create_user(
-            username="OtherUser",
-            first_name="other",
-            last_name="user",
-            email="other@gmail.com",
-            password="otherpass"
-        )
+        credentials = {
+            "username": "choko_admin",
+            "password": "choko_admin1",
+        }
         data = {
             "first_name": "updatedfirst",
             "last_name": "updatedlast",
             "email": "updatedtest@gmail.com",
         }
+        self.client.credentials(HTTP_AUTHORIZATION=f'Bearer {self.get_token(credentials)}')
         response = self.client.put(self.url_update, data, format='json')
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 

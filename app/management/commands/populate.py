@@ -88,7 +88,7 @@ class Command(BaseCommand):
             }
         ]
 
-        media_path = 'media/menu.jpg'
+        media_path = 'testTask/media/menu.jpg'
         restaurants = {}
         for restaurant_data in restaurants_data:
             user_instance = restaurant_data.pop('user')

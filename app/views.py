@@ -7,6 +7,7 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from django.utils import timezone
 from django.db.models import Count
+from django.contrib.auth.hashers import make_password
 
 
 
@@ -28,7 +29,6 @@ class UserCreateAPI(APIView):
 
 
 class UserUpdateAPI(APIView):
-
     def put(self, request, id):
         try:
             user = User.objects.get(pk=id)
@@ -36,10 +36,10 @@ class UserUpdateAPI(APIView):
             return Response({'error': 'User not found'}, status=status.HTTP_404_NOT_FOUND)
 
         # Check if the requesting user is the user to be updated or an admin
-        if request.user != user and not user.is_superuser:
+        if not request.user.is_superuser:
             return Response({'error': 'Permission denied'}, status=status.HTTP_403_FORBIDDEN)
-
-
+        if "password" in request.data:
+            request.data['password'] = make_password(request.data['password'])
         serializer = UserRegistrationSerializer(user, data=request.data, partial=True, context={'request': request})
         if serializer.is_valid():
             serializer.save()

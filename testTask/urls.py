@@ -3,7 +3,8 @@ from rest_framework import routers
 from app import views, admin
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 from django.urls import path, include
-
+from django.conf import settings
+from django.conf.urls.static import static
 
 
 router = routers.DefaultRouter()
@@ -24,4 +25,4 @@ urlpatterns = [
     path('api/top_votes', views.TopVoteAPI.as_view(), name="top-rated"),
     path('api/token', TokenObtainPairView.as_view(), name='token_obtain_pair'),
     path('api/token/refresh', TokenRefreshView.as_view(), name='token_refresh'),
-]
+]+ static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

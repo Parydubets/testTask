@@ -1,4 +1,5 @@
 #!/bin/bash
+
 echo "Creating Migrations..."
 python manage.py makemigrations app
 echo ====================================
@@ -9,7 +10,8 @@ echo ====================================
 
 python manage.py populate
 
-pytest --create-db
+pytest testTask --create-db
+
 
 echo "Starting Server..."
 python manage.py runserver 0.0.0.0:8000
