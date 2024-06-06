@@ -40,7 +40,7 @@ class UserUpdateAPI(APIView):
             return Response({'error': 'Permission denied'}, status=status.HTTP_403_FORBIDDEN)
 
 
-        serializer = UserSerializer(user, data=request.data, partial=True, context={'request': request})
+        serializer = UserRegistrationSerializer(user, data=request.data, partial=True, context={'request': request})
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=status.HTTP_200_OK)

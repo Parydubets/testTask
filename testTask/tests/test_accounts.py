@@ -34,17 +34,17 @@ class AccountTests(APITestCase):
 class AccountTestsAdmin(APITestCase):
     def setUp(self):
         self.url_update = reverse('user-update', args=[2])
-        self.client.credentials(HTTP_AUTHORIZATION=f'Bearer {self.get_token()}')
-
-
-    def get_token(self):
-        """
-        Log in admin user
-        """
         data = {
             'username': 'admin',
             'password': 'adminhere1'
         }
+        self.client.credentials(HTTP_AUTHORIZATION=f'Bearer {self.get_token(data)}')
+
+
+    def get_token(self, data):
+        """
+        Log in admin user
+        """
         response = self.client.post(reverse('token_obtain_pair'), data, format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertIn('access', response.data)
@@ -66,11 +66,15 @@ class AccountTestsAdmin(APITestCase):
             "last_name": "updatedlast",
             "email": "updatedtest@gmail.com",
         }
-        print(self.url_update, data)
+        credentials = {
+            'username': 'choko_admin',
+            'password': 'choko_admin1'
+        }
+        self.client.credentials(HTTP_AUTHORIZATION=f'Bearer {self.get_token(credentials)}')
         response = self.client.put(self.url_update, data, format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
-        updated_user = User.objects.get(username="TestUser")
+        updated_user = User.objects.get(username="choko_admin")
         self.assertEqual(updated_user.first_name, 'updatedfirst')
         self.assertEqual(updated_user.last_name, 'updatedlast')
         self.assertEqual(updated_user.email, 'updatedtest@gmail.com')
@@ -101,8 +105,9 @@ class AccountTestsAdmin(APITestCase):
             "last_name": "updatedlast",
             "email": "updatedtest@gmail.com",
         }
+
         response = self.client.put(non_existent_url, data, format='json')
-        self.assertEqual(response.status_code, status.HTTP_401)
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
     def test_update_user_without_authentication(self):
         """
@@ -113,5 +118,6 @@ class AccountTestsAdmin(APITestCase):
             "last_name": "updatedlast",
             "email": "updatedtest@gmail.com",
         }
+        self.client.credentials(HTTP_AUTHORIZATION=f'')
         response = self.client.put(self.url_update, data, format='json')
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
