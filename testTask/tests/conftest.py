@@ -1,16 +1,20 @@
-from django.core.management.base import BaseCommand
+# conftest.py
+import subprocess
+import pytest
+import os
 from django.contrib.auth.models import User
 from django.contrib.auth.hashers import make_password
-from app.models import Restaurant, Menu, Votes
-from django.core.files import File
 from django.utils import timezone
-import os
-import subprocess
+from app.models import Restaurant, Menu
+from django.core.files import File
+from app.models import Restaurant, Menu, Votes
+from datetime import datetime
 
-class Command(BaseCommand):
-    help = 'Populate database with users and restaurants'
 
-    def handle(self, *args, **kwargs):
+@pytest.fixture(scope='session', autouse=True)
+def populate_db(django_db_setup, django_db_blocker):
+    #TODO: make common db access instead of data repopulation
+    with django_db_blocker.unblock():
         users_data = [
             {
                 "username": "admin",
@@ -19,6 +23,7 @@ class Command(BaseCommand):
                 "last_name": "Lennon",
                 "email": "admin@example.com",
                 "is_superuser": True,
+                "is_staff": True,
                 "last_login": "2024-06-05 18:33:40.474778+00"
             },
             {
@@ -56,7 +61,6 @@ class Command(BaseCommand):
         ]
         users = {}
         for user_data in users_data:
-
             user_data["password"] = make_password(user_data["password"])
             user, created = User.objects.update_or_create(
                 username=user_data["username"],
@@ -95,15 +99,12 @@ class Command(BaseCommand):
             restaurant = Restaurant.objects.update_or_create(user=user_instance, defaults=restaurant_data)
             restaurants[restaurant_data["name"]] = restaurant
 
-
-
         DAYS = (("sunday", "sunday"), ("monday", "monday"), ("tuesday", "tuesday"), ("wednesday", "wednesday"),
                 ("thursday", "thursday"), ("friday", "friday"), ("saturday", "saturday"))
 
         media_path = 'media/menu.jpg'  # Path to the menu image file in the media folder
         for restaurant_id, restaurant_instance in restaurants.items():
             for day in DAYS:
-
 
                 menu_instance, created = Menu.objects.update_or_create(
                     restaurant_id=restaurant_instance[0].id,
@@ -117,17 +118,17 @@ class Command(BaseCommand):
                     menu_instance.save()
 
         votes_data = [
-            {"id": 1,"vote_user_id": users["admin"], "restaurant_id": restaurants["John's Cafe"][0], "datetime": timezone.now()},
+            {"id": 1, "vote_user_id": users["admin"], "restaurant_id": restaurants["John's Cafe"][0],
+             "datetime": timezone.now()},
             {"id": 2, "vote_user_id": users["choko_admin"], "restaurant_id": restaurants["Quill's Grill"][0],
              "datetime": timezone.now()},
-            {"id": 3, "vote_user_id": users["qwerty"], "restaurant_id": restaurants["Mike`s"][0], "datetime": timezone.now()},
-            {"id": 4, "vote_user_id": users["qwerty2"], "restaurant_id": restaurants["John's Cafe"][0], "datetime": "2024-06-05 18:33:40.474778+00"},
+            {"id": 3, "vote_user_id": users["qwerty"], "restaurant_id": restaurants["Mike`s"][0],
+             "datetime": timezone.now()},
+            {"id": 4, "vote_user_id": users["qwerty2"], "restaurant_id": restaurants["John's Cafe"][0],
+             "datetime": "2024-06-05 18:33:40.474778+00"},
             {"id": 5, "vote_user_id": users["thevoter"], "restaurant_id": restaurants["Quill's Grill"][0],
              "datetime": timezone.now()},
         ]
 
         for vote_data in votes_data:
             Votes.objects.create(**vote_data)
-
-
-        self.stdout.write(self.style.SUCCESS('Successfully populated the database with users and restaurants.'))
